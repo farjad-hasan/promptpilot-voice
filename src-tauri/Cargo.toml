@@ -1,0 +1,29 @@
+[package]
+name = "promptpilot-voice"
+version = "0.1.0"
+description = "Windows-first voice typing for AI prompts powered by local Whisper or Groq"
+authors = ["Farjad Hasan"]
+edition = "2021"
+rust-version = "1.78"
+
+[lib]
+name = "promptpilot_voice_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-shell = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+cpal = "0.15"
+enigo = "0.2"
+reqwest = { version = "0.12", features = ["multipart", "json", "stream"] }
+hound = "3.5"
+tokio = { version = "1", features = ["full"] }
+dirs = "6"
+arboard = "3"
+futures-util = "0.3"

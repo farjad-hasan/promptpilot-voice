@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PromptPilot Voice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="titlebar" data-tauri-drag-region></div>
+      <div id="app-body">
+      <aside id="sidebar">
+        <div class="sidebar-header">
+          <div class="app-identity">
+            <svg class="app-icon" width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <rect width="18" height="18" rx="4" fill="currentColor" opacity="0.15"/>
+              <path d="M5 6.5h8M5 9h5.5M5 11.5h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            <span class="app-name">PromptPilot Voice</span>
+          </div>
+          <div id="status-indicator">
+            <span id="status-dot"></span>
+            <span id="status-text">Ready</span>
+          </div>
+        </div>
+        <nav id="sidebar-nav">
+          <a class="nav-item active" data-section="general">
+            <svg class="nav-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M8 5v3l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            General
+          </a>
+          <a class="nav-item" data-section="engine">
+            <svg class="nav-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M2.5 8h3l1.5-3 2 6 1.5-3h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Engine
+          </a>
+          <a class="nav-item" data-section="recording">
+            <svg class="nav-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="6" y="2.5" width="4" height="7" rx="2" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M4 8.5a4 4 0 008 0M8 12.5v1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Recording
+          </a>
+        </nav>
+        <div class="sidebar-footer">
+          <span class="version-text">v0.1.0</span>
+        </div>
+      </aside>
+
+      <main id="content">
+        <section id="section-general" class="content-section active">
+          <div class="section-header">
+            <h2 class="section-title">General</h2>
+            <p class="section-desc">Configure your audio input device</p>
+          </div>
+          <div class="settings-list">
+            <div class="setting-row">
+              <div class="setting-label">
+                <span class="label-text">Microphone</span>
+                <span class="label-hint">Select your preferred input device</span>
+              </div>
+              <div class="setting-control">
+                <select id="mic-select"></select>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="section-engine" class="content-section">
+          <div class="section-header">
+            <h2 class="section-title">Engine</h2>
+            <p class="section-desc">Choose your transcription backend</p>
+          </div>
+          <div class="settings-list">
+            <div class="setting-row">
+              <div class="setting-label">
+                <span class="label-text">Transcription Engine</span>
+                <span class="label-hint">Local runs on-device, Cloud requires an API key</span>
+              </div>
+              <div class="setting-control">
+                <div class="toggle-group">
+                  <button id="engine-local" class="toggle-btn active">Local Whisper</button>
+                  <button id="engine-cloud" class="toggle-btn">Groq Cloud</button>
+                </div>
+              </div>
+            </div>
+            <div class="setting-row" id="local-settings">
+              <div class="setting-label">
+                <span class="label-text">Model Size</span>
+                <span class="label-hint">Larger models are more accurate but use more resources</span>
+              </div>
+              <div class="setting-control">
+                <div class="model-row">
+                  <select id="model-select">
+                    <option value="small">Small (~466 MB)</option>
+                    <option value="medium">Medium (~1.5 GB)</option>
+                  </select>
+                  <button id="download-btn" class="btn-primary">Download</button>
+                </div>
+              </div>
+            </div>
+            <div id="download-progress" class="hidden">
+              <div id="progress-bar"><div id="progress-fill"></div></div>
+            </div>
+            <div class="setting-row hidden" id="cloud-settings">
+              <div class="setting-label">
+                <span class="label-text">Groq API Key</span>
+                <span class="label-hint">Stored locally in config.json; get your key from console.groq.com</span>
+              </div>
+              <div class="setting-control">
+                <input type="password" id="groq-key" placeholder="gsk_..." />
+              </div>
+            </div>
+            <div class="setting-row" id="vocabulary-group">
+              <div class="setting-label">
+                <span class="label-text">Vocabulary hints</span>
+                <span class="label-hint">Comma-separated names and terms Whisper should recognise</span>
+              </div>
+              <div class="setting-control setting-control-full">
+                <textarea
+                  id="vocabulary-prompt"
+                  class="setting-textarea"
+                  rows="3"
+                  placeholder="project names, product terms, teammate names, ..."
+                  spellcheck="false"
+                ></textarea>
+                <div class="char-counter">
+                  <span id="vocab-char-count">0</span>/600 characters
+                  <span id="vocab-warning" class="vocab-warning hidden">⚠ List may be truncated — put most important terms first</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="section-recording" class="content-section">
+          <div class="section-header">
+            <h2 class="section-title">Recording</h2>
+            <p class="section-desc">Configure how you trigger transcription</p>
+          </div>
+          <div class="settings-list">
+            <div class="setting-row">
+              <div class="setting-label">
+                <span class="label-text">Recording Mode</span>
+                <span class="label-hint">Toggle starts/stops, Push to Talk records while held</span>
+              </div>
+              <div class="setting-control">
+                <div class="toggle-group">
+                  <button id="mode-toggle" class="toggle-btn active">Toggle</button>
+                  <button id="mode-ptt" class="toggle-btn">Push to Talk</button>
+                </div>
+              </div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-label">
+                <span class="label-text">Hotkey</span>
+                <span class="label-hint">Global keyboard shortcut to trigger recording</span>
+              </div>
+              <div class="setting-control">
+                <kbd id="hotkey-text">Cmd+Shift+D</kbd>
+              </div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-label">
+                <span class="label-text">Urdu hotkey</span>
+                <span class="label-hint">Triggers recording in Urdu — overlay turns amber</span>
+              </div>
+              <div class="setting-control">
+                <kbd id="urdu-hotkey-text">Ctrl+Alt+Space</kbd>
+              </div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-label">
+                <span class="label-text">Paste method</span>
+                <span class="label-hint">Direct input preserves your clipboard; switch to Clipboard if text appears garbled</span>
+              </div>
+              <div class="setting-control">
+                <div class="toggle-group" id="paste-method-toggle">
+                  <button id="paste-direct" class="toggle-btn" data-method="direct">Direct input</button>
+                  <button id="paste-clipboard" class="toggle-btn" data-method="clipboard">Clipboard</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
