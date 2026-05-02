@@ -132,6 +132,10 @@ npm run tauri build
 
 `npm run tauri build` requires the `whisper.cpp` sidecar files listed above.
 
+## Manual Testing
+
+The `0.1.0` Windows installer has been manually tested on Windows with Groq cloud transcription. The tested path includes installing the app, launching it, entering a Groq API key, recording speech, transcribing through Groq, and pasting text into another focused application.
+
 ## Attribution
 
 PromptPilot Voice is derived from [albertshiney/typr](https://github.com/albertshiney/typr) and was inspired by the YouTube video [I cancelled Wispr Flow... and built my own (it's free)](https://youtu.be/_ghw5bwBMjQ?si=LYxuleF29qNLMEs0).
