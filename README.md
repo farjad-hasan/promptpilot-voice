@@ -38,7 +38,15 @@ The Tauri CLI starts the Vite dev server and the Rust backend. The first Rust bu
 
 ## Sidecar Setup
 
-Local transcription uses a pre-built `whisper.cpp` CLI binary as a Tauri sidecar. Download `whisper-bin-x64.zip` from the latest `whisper.cpp` release and place the files in `src-tauri/binaries/`.
+Local transcription uses a pre-built `whisper.cpp` CLI binary as a Tauri sidecar.
+
+Run this command to download the latest official Windows x64 `whisper.cpp` CPU archive and copy the required files into `src-tauri/binaries/`:
+
+```powershell
+npm run setup:whisper
+```
+
+The command downloads `whisper-bin-x64.zip`, renames `whisper-cli.exe`, and copies the required DLLs.
 
 Expected layout:
 
@@ -51,7 +59,9 @@ src-tauri/binaries/
 └── whisper.dll
 ```
 
-Rename `whisper-cli.exe` to `whisper-cpp-x86_64-pc-windows-msvc.exe`. The `src-tauri/binaries/` directory is ignored by Git so large binaries and DLLs are not committed.
+Manual setup is also possible: download `whisper-bin-x64.zip` from the latest `whisper.cpp` release, rename `whisper-cli.exe` to `whisper-cpp-x86_64-pc-windows-msvc.exe`, and copy the files listed above into `src-tauri/binaries/`.
+
+The `src-tauri/binaries/` directory is ignored by Git so large binaries and DLLs are not committed.
 
 ## Configuration
 
@@ -124,13 +134,14 @@ Update Rust with `rustup update stable`. Rust/Cargo 1.69 cannot read lockfile ve
 
 ```powershell
 npm ci
+npm run setup:whisper
 npm run build
 cargo test --manifest-path src-tauri\Cargo.toml
 cargo build --manifest-path src-tauri\Cargo.toml
 npm run tauri build
 ```
 
-`npm run tauri build` requires the `whisper.cpp` sidecar files listed above.
+`npm run setup:whisper` prepares the `whisper.cpp` sidecar files required by `npm run tauri build`.
 
 ## Manual Testing
 

@@ -18,7 +18,7 @@ pub async fn transcribe_local(
         model_path
     );
 
-    let mut cmd = app
+    let cmd = app
         .shell()
         .sidecar("whisper-cpp")
         .map_err(|e| format!("Failed to create sidecar command: {}", e))?;
@@ -26,22 +26,26 @@ pub async fn transcribe_local(
     // In dev builds, whisper DLLs live in src-tauri/binaries/ which cargo clean never touches.
     // Add that dir to PATH for the subprocess so Windows finds ggml*.dll / whisper.dll there.
     #[cfg(all(target_os = "windows", debug_assertions))]
-    if let Some(binaries_dir) = std::env::current_exe().ok().and_then(|exe| {
-        // exe = src-tauri/target/debug/promptpilot-voice.exe → go up 3 to reach src-tauri/
-        let dir = exe.parent()?.parent()?.parent()?.join("binaries");
-        if dir.exists() {
-            Some(dir)
-        } else {
-            None
+    let cmd = {
+        let mut cmd = cmd;
+        if let Some(binaries_dir) = std::env::current_exe().ok().and_then(|exe| {
+            // exe = src-tauri/target/debug/promptpilot-voice.exe -> go up 3 to reach src-tauri/
+            let dir = exe.parent()?.parent()?.parent()?.join("binaries");
+            if dir.exists() {
+                Some(dir)
+            } else {
+                None
+            }
+        }) {
+            let path = format!(
+                "{};{}",
+                binaries_dir.display(),
+                std::env::var("PATH").unwrap_or_default()
+            );
+            cmd = cmd.env("PATH", path);
         }
-    }) {
-        let path = format!(
-            "{};{}",
-            binaries_dir.display(),
-            std::env::var("PATH").unwrap_or_default()
-        );
-        cmd = cmd.env("PATH", path);
-    }
+        cmd
+    };
 
     let output = cmd
         .args([
